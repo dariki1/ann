@@ -29,7 +29,7 @@ fn read_data(file_path: &str) -> Vec<Vec<f64>> {
 
 		for x in 0..IMAGE_WIDTH {
 			for y in 0..IMAGE_HEIGHT {
-				ret[image][x*IMAGE_WIDTH + y] = ((contents[image*IMAGE_HEIGHT*IMAGE_WIDTH+x*IMAGE_WIDTH+y+DATA_OFFSET] as f64/255f64) as f64);//.round();
+				ret[image][x*IMAGE_WIDTH + y] = contents[image*IMAGE_HEIGHT*IMAGE_WIDTH+x*IMAGE_WIDTH+y+DATA_OFFSET] as f64/255f64;
 			}
 		}
 	}

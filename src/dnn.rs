@@ -1,26 +1,26 @@
 use rand::random;
 
-struct Node {
+pub struct Node {
 	value: f64,
-	output: f64,
+	pub output: f64,
 }
 
-pub struct Net {
+pub struct DNN {
 	pub weights: Vec<Vec<Vec<f64>>>,
 	weights_adjustment: Vec<Vec<Vec<f64>>>,
-	node_vals: Vec<Vec<Node>>,
+	pub node_vals: Vec<Vec<Node>>,
 	bias_per_layer: usize,
 	bias_output: f64,
-	learn_rate: f64
+	pub learn_rate: f64
 }
 
-pub fn make_net(nodes_per_layer: &[usize]) -> Net{
-	let mut net: Net = Net {
+pub fn new(nodes_per_layer: &[usize]) -> DNN{
+	let mut net: DNN = DNN {
 		weights: vec![vec![]; nodes_per_layer.len()-1],
 		weights_adjustment: vec![vec![]; nodes_per_layer.len()-1],
 		node_vals: vec![],
 		bias_per_layer: 1,
-		bias_output: 1f64,
+		bias_output: sigmoid(1f64),
 		learn_rate: 0.1
 	};
 
@@ -55,7 +55,7 @@ pub fn make_net(nodes_per_layer: &[usize]) -> Net{
 	return net;
 }
 
-pub fn run_net(net: &mut Net, inputs: &[f64]) -> Vec<f64> {
+pub fn run_net(net: &mut DNN, inputs: &[f64]) -> Vec<f64> {
 	for input in 0..inputs.len() {
 		net.node_vals[0][input].value = inputs[input];
 		net.node_vals[0][input].output = inputs[input];
@@ -68,7 +68,7 @@ pub fn run_net(net: &mut Net, inputs: &[f64]) -> Vec<f64> {
 				net.node_vals[layer][output].value += net.weights[layer-1][input][output] * if input < net.node_vals[layer-1].len() {
 					net.node_vals[layer-1][input].output
 				} else {
-					sigmoid(net.bias_output)
+					net.bias_output
 				};
 			}
 			net.node_vals[layer][output].output = sigmoid(net.node_vals[layer][output].value);
@@ -83,14 +83,10 @@ pub fn run_net(net: &mut Net, inputs: &[f64]) -> Vec<f64> {
 	return ret;
 }
 
-pub fn train_net(mut net: &mut Net, inputs: &[f64], outputs: &[f64], execute: bool) {
+pub fn train_net(mut net: &mut DNN, inputs: &[f64], outputs: &[f64], execute: bool) {
 	run_net(&mut net, &inputs);
 
-	let mut expected_outputs: Vec<f64> = vec!();
-
-	for output in 0..outputs.len() {
-		expected_outputs.push(outputs[output]);
-	}
+	let mut expected_outputs: Vec<f64> = outputs.clone().to_vec();
 
 	for layer in (1..net.node_vals.len()).rev() {
 		let mut next_expected_values: Vec<f64> = vec![0f64; net.node_vals[layer-1].len()];
@@ -103,7 +99,7 @@ pub fn train_net(mut net: &mut Net, inputs: &[f64], outputs: &[f64], execute: bo
 				net.weights_adjustment[layer-1][input][output] += gradient * if input < net.node_vals[layer-1].len() {
 					net.node_vals[layer-1][input].output
 				} else {
-					sigmoid(net.bias_output)
+					net.bias_output
 				};
 
 				if input < next_expected_values.len() {
@@ -117,10 +113,7 @@ pub fn train_net(mut net: &mut Net, inputs: &[f64], outputs: &[f64], execute: bo
 			}
 		}
 
-		expected_outputs = vec!();
-		for output in 0..next_expected_values.len() {
-			expected_outputs.push(next_expected_values[output]);
-		}
+		expected_outputs = next_expected_values.clone();		
 	}
 }
 
