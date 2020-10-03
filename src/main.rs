@@ -5,7 +5,8 @@ mod gan;
 mod mnist;
 
 fn main() {
-	gan_run();
+	//gan_run();
+	mnist_run();
 }
 
 fn gan_run() {
@@ -80,7 +81,7 @@ fn mnist_test(mut net: &mut dnn::DNN, inputs: &Vec<Vec<f64>>, outputs: &Vec<Vec<
 	for i in 0..inputs.len() {
 		let guess = dnn::run_net(&mut net, &inputs[i]);
 		
-		let mut high: usize = 1;
+		let mut high: usize = 0;
 
 		for g in 1..guess.len() {
 			if guess[g] > guess[high] {
@@ -100,7 +101,7 @@ fn mnist_test(mut net: &mut dnn::DNN, inputs: &Vec<Vec<f64>>, outputs: &Vec<Vec<
 fn mnist_train(mut net: &mut dnn::DNN, inputs: &Vec<Vec<f64>>, outputs: &Vec<Vec<f64>>) {
 	let start = Instant::now();
 	for i in 0..inputs.len() {
-		dnn::train_net(&mut net, &inputs[i], &outputs[i], i%9==0);
+		dnn::train_net(&mut net, &inputs[i], &outputs[i], i%10==9);
 	}
 	println!("Trained in {:.2?}", start.elapsed());
 }
