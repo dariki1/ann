@@ -19,11 +19,11 @@ pub fn new(discriminator_nodes: &[usize], generator_nodes: &[usize]) -> GAN {
 	}
 }
 
-pub fn generate(mut gen: &mut dnn::DNN, noise: &Vec<f64>) -> Vec<f64> {
+pub fn generate(mut gen: &mut dnn::DNN, noise: &Vec<f32>) -> Vec<f32> {
 	return dnn::run_net(&mut gen, &noise);
 }
 
-pub fn train_discriminator(mut gan: &mut GAN, inputs: &Vec<Vec<f64>>) {
+pub fn train_discriminator(mut gan: &mut GAN, inputs: &Vec<Vec<f32>>) {
 	for image in 0..inputs.len() {
 		// Train on fake (generated) data
 		let noise = gen_noise(gan.generator.node_vals[0].len() as u32);
@@ -45,7 +45,7 @@ pub fn train_generator(mut gan: &mut GAN, iters: usize) {
 	}
 }
 
-/*pub fn train(mut gan: &mut GAN, inputs: &Vec<Vec<f64>>) {
+/*pub fn train(mut gan: &mut GAN, inputs: &Vec<Vec<f32>>) {
 	println!("Training discriminator");
 	// Train Discriminator
 	for image in 0..inputs.len() {
@@ -57,8 +57,8 @@ pub fn train_generator(mut gan: &mut GAN, iters: usize) {
 		dnn::train_net(&mut gan.discriminator, &inputs[image], &[1.], image%5==0);
 	}
 
-	let mut t_fake: f64 = 0.;
-	let mut t_real: f64 = 0.;
+	let mut t_fake: f32 = 0.;
+	let mut t_real: f32 = 0.;
 
 	for i in 0..10 {
 		t_real += dnn::run_net(&mut gan.discriminator, &inputs[i])[0];
@@ -66,7 +66,7 @@ pub fn train_generator(mut gan: &mut GAN, iters: usize) {
 		t_fake += dnn::run_net(&mut gan.discriminator, &generate(&mut gan.generator, &noise))[0];
 	}
 
-	println!("Real average guess; {}\nFake average guess; {}", t_real/10f64, t_fake/10f64);
+	println!("Real average guess; {}\nFake average guess; {}", t_real/10f32, t_fake/10f32);
 
 	println!("Training generator");
 	// Train Generator
@@ -88,18 +88,18 @@ pub fn train_generator(mut gan: &mut GAN, iters: usize) {
 		t_fake += dnn::run_net(&mut gan.discriminator, &generate(&mut gan.generator, &noise))[0];
 	}
 
-	println!("Real average guess; {}\nFake average guess; {}", t_real/10f64, t_fake/10f64);
+	println!("Real average guess; {}\nFake average guess; {}", t_real/10f32, t_fake/10f32);
 }*/
 
-fn get_error(mut discriminator: &mut dnn::DNN, inputs: Vec<f64>, outputs: Vec<f64>) -> Vec<f64>{
+fn get_error(mut discriminator: &mut dnn::DNN, inputs: Vec<f32>, outputs: Vec<f32>) -> Vec<f32>{
 	dnn::run_net(&mut discriminator, &inputs);
 
-	let mut expected_outputs: Vec<f64> = outputs.clone().to_vec();
+	let mut expected_outputs: Vec<f32> = outputs.clone().to_vec();
 
 	for layer in (1..discriminator.node_vals.len()).rev() {
-		let mut next_expected_values: Vec<f64> = vec![0f64; discriminator.node_vals[layer-1].len()];
+		let mut next_expected_values: Vec<f32> = vec![0f32; discriminator.node_vals[layer-1].len()];
 		for output in 0..discriminator.node_vals[layer].len() {
-			let error: f64 = expected_outputs[output] - discriminator.node_vals[layer][output].output;
+			let error: f32 = expected_outputs[output] - discriminator.node_vals[layer][output].output;
 			for input in 0..discriminator.node_vals[layer-1].len() {
 				next_expected_values[input] += discriminator.weights[layer-1][input][output] * error;
 			}
@@ -111,11 +111,11 @@ fn get_error(mut discriminator: &mut dnn::DNN, inputs: Vec<f64>, outputs: Vec<f6
 	return expected_outputs;
 }
 
-pub fn gen_noise(noise_count: u32) -> Vec<f64> {
-	let mut ret: Vec<f64> = vec![];
+pub fn gen_noise(noise_count: u32) -> Vec<f32> {
+	let mut ret: Vec<f32> = vec![];
 
 	for i in 0..noise_count {
-		ret.push(random::<f64>());
+		ret.push(random::<f32>());
 	}
 
 	return ret;

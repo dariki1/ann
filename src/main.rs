@@ -14,7 +14,7 @@ fn gan_run() {
 	let train_dat = mnist::get_training_data();
 
 	for i in 0..100 {
-		let mut score: f64 = 0.;
+		let mut score: f32 = 0.;
 		while score < 0.6 {
 			println!("Training discriminator");
 			score = 0.;
@@ -22,22 +22,22 @@ fn gan_run() {
 			for e in 0..100 {
 				score += dnn::run_net(&mut gan.discriminator, &train_dat[e])[0];
 				let noise = gan::gen_noise(gan.generator.node_vals[0].len() as u32);
-				score += 1f64-dnn::run_net(&mut gan.discriminator, &gan::generate(&mut gan.generator, &noise))[0];
+				score += 1f32-dnn::run_net(&mut gan.discriminator, &gan::generate(&mut gan.generator, &noise))[0];
 			}
-			score /= 200f64;
-			println!("Discriminator scored {}%", score*100f64);
+			score /= 200f32;
+			println!("Discriminator scored {}%", score*100f32);
 		}
 
-		score = 0f64;
+		score = 0f32;
 		println!("Training Generator");
 		gan::train_generator(&mut gan, 1000);
 		for e in 0..100 {
 			score += dnn::run_net(&mut gan.discriminator, &train_dat[e])[0];
 			let noise = gan::gen_noise(gan.generator.node_vals[0].len() as u32);
-			score += 1f64-dnn::run_net(&mut gan.discriminator, &gan::generate(&mut gan.generator, &noise))[0];
+			score += 1f32-dnn::run_net(&mut gan.discriminator, &gan::generate(&mut gan.generator, &noise))[0];
 		}
-		score /= 200f64;
-		println!("Discriminator scored {}%", score*100f64);
+		score /= 200f32;
+		println!("Discriminator scored {}%", score*100f32);
 
 		println!("Training done");
 		gan_out(&mut gan.generator);
@@ -63,20 +63,20 @@ fn mnist_run() {
 	let test_dat = mnist::get_testing_data();
 	let test_lab = mnist::get_testing_label();
 
-	let mut net = dnn::new(&[784,20,20,10]);
+	let mut net = dnn::new(&[784,100,20,10]);
 	
-	println!("Test ran at {}%", mnist_test(&mut net, &test_dat, &test_lab)*100f64);
+	println!("Test ran at {}%", mnist_test(&mut net, &test_dat, &test_lab)*100f32);
 
 	for i in 0..500 {
 		println!("Loop #{}", i);
 		mnist_train(&mut net, &train_dat, &train_lab);
-		println!("Test ran at {}%", mnist_test(&mut net, &test_dat, &test_lab)*100f64);
+		println!("Test ran at {}%", mnist_test(&mut net, &test_dat, &test_lab)*100f32);
 	}
 }
 
-fn mnist_test(mut net: &mut dnn::DNN, inputs: &Vec<Vec<f64>>, outputs: &Vec<Vec<f64>>) -> f64 {
+fn mnist_test(mut net: &mut dnn::DNN, inputs: &Vec<Vec<f32>>, outputs: &Vec<Vec<f32>>) -> f32 {
 	let start = Instant::now();
-	let mut ret = 0f64;
+	let mut ret = 0f32;
 
 	for i in 0..inputs.len() {
 		let guess = dnn::run_net(&mut net, &inputs[i]);
@@ -95,10 +95,10 @@ fn mnist_test(mut net: &mut dnn::DNN, inputs: &Vec<Vec<f64>>, outputs: &Vec<Vec<
 	}
 	println!("Tested in {:.2?}", start.elapsed());
 
-	return ret/(inputs.len() as f64);
+	return ret/(inputs.len() as f32);
 }
 
-fn mnist_train(mut net: &mut dnn::DNN, inputs: &Vec<Vec<f64>>, outputs: &Vec<Vec<f64>>) {
+fn mnist_train(mut net: &mut dnn::DNN, inputs: &Vec<Vec<f32>>, outputs: &Vec<Vec<f32>>) {
 	let start = Instant::now();
 	for i in 0..inputs.len() {
 		dnn::train_net(&mut net, &inputs[i], &outputs[i], i%10==9);

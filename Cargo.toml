@@ -8,4 +8,4 @@ edition = "2018"
 
 [dependencies]
 rand = "0.7.3"
-winrt = "0.7.2"
+arrayfire = "3.7"
