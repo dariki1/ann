@@ -10,10 +10,10 @@ fn main() {
 }
 
 fn gan_run() {
-	let mut gan = gan::new(&[784,1], &[10,20,20,784]);
+	let mut gan = gan::new(&[784,20,1], &[10,20,20,784]);
 	let train_dat = mnist::get_training_data();
 
-	for i in 0..100 {
+	for i in 0..1000 {
 		let mut score: f32 = 0.;
 		while score < 0.6 {
 			println!("Training discriminator");
@@ -26,19 +26,23 @@ fn gan_run() {
 			}
 			score /= 200f32;
 			println!("Discriminator scored {}%", score*100f32);
+			println!("{}", gan.discriminator.weights[0][0][0]);
+			println!("{}", gan.discriminator.weights[1][0][0]);
 		}
 
-		score = 0f32;
-		println!("Training Generator");
-		gan::train_generator(&mut gan, 1000);
-		for e in 0..100 {
-			score += dnn::run_net(&mut gan.discriminator, &train_dat[e])[0];
-			let noise = gan::gen_noise(gan.generator.node_vals[0].len() as u32);
-			score += 1f32-dnn::run_net(&mut gan.discriminator, &gan::generate(&mut gan.generator, &noise))[0];
-		}
-		score /= 200f32;
-		println!("Discriminator scored {}%", score*100f32);
-
+		score = 1f32;
+		//while score > 0.6 {
+			println!("Training Generator");
+			score = 0f32;
+			gan::train_generator(&mut gan, 1000);
+			for e in 0..100 {
+				score += dnn::run_net(&mut gan.discriminator, &train_dat[e])[0];
+				let noise = gan::gen_noise(gan.generator.node_vals[0].len() as u32);
+				score += 1f32-dnn::run_net(&mut gan.discriminator, &gan::generate(&mut gan.generator, &noise))[0];
+			}
+			score /= 200f32;
+			println!("Discriminator scored {}%", score*100f32);
+		//}
 		println!("Training done");
 		gan_out(&mut gan.generator);
 	}
@@ -64,7 +68,7 @@ fn mnist_run() {
 	let test_lab = mnist::get_testing_label();
 
 	let mut net = dnn::new(&[784,100,20,10]);
-	
+
 	println!("Test ran at {}%", mnist_test(&mut net, &test_dat, &test_lab)*100f32);
 
 	for i in 0..500 {

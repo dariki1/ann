@@ -5,7 +5,9 @@ pub struct GAN {
 	pub discriminator: dnn::DNN,
 	pub generator: dnn::DNN
 }
-
+/**
+ * Creates a new GAN
+ */
 pub fn new(discriminator_nodes: &[usize], generator_nodes: &[usize]) -> GAN {
 	if discriminator_nodes[discriminator_nodes.len()-1] != 1 {
 		panic!("Discriminator must have a single node for output, had {}", discriminator_nodes[discriminator_nodes.len()-1]);

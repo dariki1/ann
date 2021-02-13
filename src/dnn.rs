@@ -1,4 +1,5 @@
 use rand::random;
+use arrayfire::*;
 
 pub struct Node {
 	value: f32,
@@ -126,15 +127,6 @@ fn activation_derivative(value: f32) -> f32 {
 	sigmoid_derivative(value)
 }
 
-/* Tends to turn values into NaN, I'll fix it later
-fn tanh(value: f32) -> f32 {
-	return 2f32*sigmoid(2f32*value)-1f32;
-}
-
-fn tanh_derivative(value: f32) -> f32 {
-	return 4f32*sigmoid_derivative(2f32*value);
-}
-*/
 fn sigmoid(value: f32) -> f32 {
 	return 1f32/(1f32+(-value).exp());
 }
