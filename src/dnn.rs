@@ -1,5 +1,4 @@
 use rand::random;
-use arrayfire::*;
 
 pub struct Node {
 	value: f32,
@@ -95,6 +94,8 @@ pub fn train_net(mut net: &mut DNN, inputs: &[f32], outputs: &[f32], execute: bo
 		for output in 0..net.node_vals[layer].len() {
 			let error: f32 = expected_outputs[output] - net.node_vals[layer][output].output;
 			let gradient: f32 = activation_derivative(net.node_vals[layer][output].value) * error * net.learn_rate;
+
+			//let layer_less_one = layer - 1;
 
 			for input in 0..net.weights[layer-1].len() {
 				net.weights_adjustment[layer-1][input][output] += gradient * if input < net.node_vals[layer-1].len() {
